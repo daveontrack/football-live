@@ -1,7 +1,17 @@
+import { liveScoreCardStyles as s } from "../assets/dummyStyles";
+import {
+  getMatchLeague,
+  getMatchScore,
+  getMatchStatus,
+  getMatchValue,
+  getTeamLogo,
+} from "../services/footballApi";
+import { useFavorites } from "../context/FavoritesContext";
+import { Heart } from "lucide-react";
 
-const teamPaths = {
-  home: ['home.name', 'homeTeam.name', 'teams.home.name', 'homeTeam', 'home'],
-  away: ['away.name', 'awayTeam.name', 'teams.away.name', 'awayTeam', 'away'],
+const teamNamePaths = {
+  home: ["home.name", "homeTeam.name", "teams.home.name", "homeTeam", "home"],
+  away: ["away.name", "awayTeam.name", "teams.away.name", "awayTeam", "away"],
 };
 
 function TeamLogo({ logo, name }) {
@@ -17,13 +27,82 @@ function TeamLogo({ logo, name }) {
 }
 
 export default function LiveScoreCard({ match }) {
-  const homeTeam = getMatchValue(match, teamPaths.home);
-  const awayTeam = getMatchValue(match, teamPaths.away);
-  const homeLogo = getTeamLogo(match, 'home');
-  const awayLogo = getTeamLogo(match, 'away');
-  const homeScore = getMatchValue(match, scorePaths.home, '0');
-  const awayScore = getMatchValue(match, scorePaths.away, '0');
-  const league = getMatchLeague(match);
-  const matchTime = getMatchValue(match, ['minute', 'time.elapsed', 'status.elapsed'], getMatchStatus(match));
+  const { isMatchFavorited, toggleMatch, isTeamFavorited, toggleTeam } = useFavorites();
+  const matchId = getMatchValue(match, ["id", "eventId", "fixture.id"]) || `${getMatchValue(match, teamNamePaths.home)}-${getMatchValue(match, teamNamePaths.away)}`;
+  const favorited = isMatchFavorited(matchId);
 
+  const homeTeam = getMatchValue(match, teamNamePaths.home);
+  const awayTeam = getMatchValue(match, teamNamePaths.away);
+  const homeLogo = getTeamLogo(match, "home");
+  const awayLogo = getTeamLogo(match, "away");
+  const homeScore = getMatchScore(match).home;
+  const awayScore = getMatchScore(match).away;
+  const league = getMatchLeague(match);
+  const matchTime = getMatchStatus(match);
+
+  return (
+    <article className={s.card}>
+      <div className={s.glowRed} />
+      <div className={s.glowBlue} />
+
+      {/* Header */}
+      <div className={s.header}>
+        <p className={s.leagueText}>{league}</p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => toggleMatch(matchId)}
+            className="grid size-7 place-items-center rounded-full transition"
+            style={{ background: favorited ? "rgba(239,68,68,0.25)" : "rgba(255,255,255,0.1)" }}
+            title={favorited ? "Remove from favorites" : "Add to favorites"}
+          >
+            <Heart size={12} className={favorited ? "text-red-400" : "text-white/40"} fill={favorited ? "currentColor" : "none"} />
+          </button>
+          <div className={s.liveBadge}>
+            <span className={s.liveDot} />
+            <span className={s.liveText}>Live</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Teams + Score */}
+      <div className={s.teamsGrid}>
+        <div className={s.teamColumn}>
+          <TeamLogo logo={homeLogo} name={homeTeam} />
+          <button
+            type="button"
+            onClick={() => toggleTeam(homeTeam)}
+            className={`text-center transition hover:text-red-400 ${isTeamFavorited(homeTeam) ? "text-red-400" : ""}`}
+            title={isTeamFavorited(homeTeam) ? "Unfollow team" : "Follow team"}
+          >
+            <span className={s.teamName}>{homeTeam}</span>
+          </button>
+        </div>
+
+        <div className={s.scoreBox}>
+          <p className={s.scoreText}>
+            {homeScore}
+            <span className={s.colon}>:</span>
+            {awayScore}
+          </p>
+        </div>
+
+        <div className={s.teamColumn}>
+          <TeamLogo logo={awayLogo} name={awayTeam} />
+          <button
+            type="button"
+            onClick={() => toggleTeam(awayTeam)}
+            className={`text-center transition hover:text-red-400 ${isTeamFavorited(awayTeam) ? "text-red-400" : ""}`}
+            title={isTeamFavorited(awayTeam) ? "Unfollow team" : "Follow team"}
+          >
+            <span className={s.teamName}>{awayTeam}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className={s.divider} />
+      <p className={s.footerText}>{matchTime}</p>
+    </article>
+  );
 }
