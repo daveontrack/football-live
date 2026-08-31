@@ -3,7 +3,7 @@ const FD_BASE = "https://api.football-data.org/v4";
 export default async function handler(req, res) {
   try {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    const token = process.env.FOOTBALL_API_KEY || "";
+    const token = process.env.FOOTBALL_API_KEY || process.env.VITE_FOOTBALL_API_KEY || "";
     const url = new URL(req.url || "/", "http://localhost");
     let path = (url.searchParams.get("path") || "").replace(/^\/+/, "");
     url.searchParams.delete("path");
