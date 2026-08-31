@@ -1,5 +1,5 @@
 /**
- * Live Player Ratings Engine
+ * Live Player Ratings Engine — Optimized
  *
  * Calculates estimated player ratings based on:
  * - Match score & team performance
@@ -7,7 +7,7 @@
  * - Player position baseline
  * - Time played
  *
- * Fetches real player names from football-data.org team squads.
+ * Uses competition context from match data to minimize API calls.
  */
 
 import {
@@ -88,16 +88,35 @@ function calculatePlayerRating({
   return clamp(Math.round(rating * 10) / 10, 4.0, 10.0);
 }
 
-// ─── REAL PLAYER DATA CACHE ────────────────────────────────
+// ─── REAL PLAYER DATA CACHE (Optimized) ────────────────────
 // Cache team squads to avoid repeated API calls
 const squadCache = new Map();
 
-async function getTeamSquad(teamId, teamName) {
+// Pre-warm cache: store squads keyed by team ID
+async function getTeamSquad(teamId, teamName, matchLeague = "") {
   if (squadCache.has(teamId)) return squadCache.get(teamId);
 
-  // Find which competition this team belongs to
-  const compCodes = Object.keys(COMPETITIONS);
-  for (const code of compCodes) {
+  // Smart lookup: use competition context from match data
+  // Instead of trying ALL codes, try the most likely one first
+  let bestCode = null;
+
+  if (matchLeague) {
+    // Try to match the league name to a competition code
+    const lower = matchLeague.toLowerCase();
+    if (lower.includes("premier")) bestCode = "PL";
+    else if (lower.includes("la liga") || lower.includes("liga")) bestCode = "PD";
+    else if (lower.includes("bundesliga")) bestCode = "BL1";
+    else if (lower.includes("serie a")) bestCode = "SA";
+    else if (lower.includes("ligue 1")) bestCode = "FL1";
+    else if (lower.includes("champion")) bestCode = "CL";
+  }
+
+  // Try the most likely competition first, then fall back to others
+  const codesToTry = bestCode
+    ? [bestCode, ...Object.keys(COMPETITIONS).filter((c) => c !== bestCode)]
+    : Object.keys(COMPETITIONS);
+
+  for (const code of codesToTry) {
     try {
       const teams = await fetchCompetitionTeams(code);
       const found = teams.find((t) => t.id === teamId);
@@ -119,8 +138,15 @@ async function getTeamSquad(teamId, teamName) {
 }
 
 function getFallbackPlayers() {
-  // Generate generic player positions when no squad data available
   return Array.from({ length: 11 }, (_, i) => `Player ${i + 1}`);
+}
+
+// ─── BATCH SQUAD LOADING ───────────────────────────────────
+// Pre-load squads for multiple teams in parallel
+async function batchLoadSquads(teams, matchLeague) {
+  return Promise.allSettled(
+    teams.map((t) => getTeamSquad(t.id, t.name, matchLeague))
+  );
 }
 
 // ─── MAIN EXPORT ───────────────────────────────────────────
@@ -159,12 +185,14 @@ export async function generateLiveRatings(match) {
     redCards: Math.random() > 0.85 ? [{ minute: Math.floor(Math.random() * minute) + 1 }] : [],
   };
 
-  // Fetch real player data from API
-  let homeSquad = null;
-  let awaySquad = null;
+  // Fetch BOTH teams' squads in parallel (instead of sequentially)
+  const teamBatch = [];
+  if (homeId) teamBatch.push({ id: homeId, name: homeName });
+  if (awayId) teamBatch.push({ id: awayId, name: awayName });
 
-  if (homeId) homeSquad = await getTeamSquad(homeId, homeName);
-  if (awayId) awaySquad = await getTeamSquad(awayId, awayName);
+  const squadResults = await batchLoadSquads(teamBatch, league);
+  const homeSquad = squadResults[0]?.status === "fulfilled" ? squadResults[0].value : null;
+  const awaySquad = squadResults[1]?.status === "fulfilled" ? squadResults[1].value : null;
 
   // Build player lists: real data or empty
   const homePlayers = homeSquad

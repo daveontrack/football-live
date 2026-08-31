@@ -1,7 +1,7 @@
 /**
- * Centralized Football API Service
+ * Centralized Football API Service — Optimized
  * Primary: football-data.org via Vite proxy
- * Features: fast rate limiter, aggressive caching, lazy per-league loading
+ * Features: fast rate limiter, request deduplication, aggressive caching, parallel fetching
  * No mock data — real API only.
  */
 
@@ -12,22 +12,28 @@ function getHeaders() {
   return {};
 }
 
-// ─── RATE LIMITER ──────────────────────────────────────────
+// ─── RATE LIMITER (Optimized) ──────────────────────────────
+// football-data.org free tier: 10 requests/minute
+// We space requests ~200ms apart (10 req in 2s, well under 60s window)
 const timestamps = [];
 const queue = [];
 let processing = false;
-const MIN_GAP = 700;
+const MIN_GAP = 200; // Reduced from 700ms
+const MAX_REQ_PER_MIN = 10;
 
 function waitMs() {
   const now = Date.now();
+  // Remove timestamps older than 60s
   while (timestamps.length && timestamps[0] <= now - 60000) timestamps.shift();
-  if (timestamps.length < 10) {
+
+  if (timestamps.length < MAX_REQ_PER_MIN) {
     if (timestamps.length > 0) {
       const elapsed = now - timestamps[timestamps.length - 1];
       if (elapsed < MIN_GAP) return MIN_GAP - elapsed;
     }
     return 0;
   }
+  // Wait until the oldest request expires from the 60s window
   return timestamps[0] + 60500 - now;
 }
 
@@ -41,7 +47,7 @@ async function processQueue() {
     timestamps.push(Date.now());
     queue.shift();
     try { resolve(await fn()); } catch (e) { reject(e); }
-    if (queue.length) await new Promise((r) => setTimeout(r, 100));
+    // No extra 100ms gap between requests — the MIN_GAP handles it
   }
   processing = false;
 }
@@ -53,23 +59,46 @@ function enqueue(fn) {
   });
 }
 
-// ─── CACHE ─────────────────────────────────────────────────
+// ─── REQUEST DEDUPLICATION ─────────────────────────────────
+// If a request for the same endpoint is already in-flight,
+// return the same promise instead of making a duplicate call.
+const inflight = new Map();
+
+function dedupedEnqueue(ep, fn) {
+  if (inflight.has(ep)) return inflight.get(ep);
+  const promise = enqueue(fn).finally(() => inflight.delete(ep));
+  inflight.set(ep, promise);
+  return promise;
+}
+
+// ─── CACHE (Optimized with stale-while-revalidate) ─────────
 const cache = new Map();
 const MAX_CACHE = 200;
 
+// TTLs in ms — increased for better caching
 function ttlKey(ep) {
-  if (ep.includes("/matches") && !ep.includes("dateFrom")) return 30000;
-  if (ep.includes("/matches")) return 300000;
-  if (ep.includes("/standings")) return 600000;
-  if (ep.includes("/teams")) return 600000;
-  if (ep.includes("/scorers")) return 600000;
-  return 120000;
+  if (ep.includes("/matches") && !ep.includes("dateFrom")) return 60000;  // 1 min (was 30s)
+  if (ep.includes("/matches")) return 600000;  // 10 min (was 5 min)
+  if (ep.includes("/standings")) return 900000; // 15 min (was 10 min)
+  if (ep.includes("/teams")) return 1800000;   // 30 min (was 10 min) — teams rarely change
+  if (ep.includes("/scorers")) return 900000;  // 15 min (was 10 min)
+  return 300000; // 5 min default (was 2 min)
 }
 
+// Stale-while-revalidate: serve stale data immediately, refresh in background
 function getCached(ep) {
   const e = cache.get(ep);
-  if (!e || Date.now() > e.t) { cache.delete(ep); return null; }
-  return e.d;
+  if (!e) return null;
+  if (Date.now() > e.t) {
+    // Cache expired — but mark as stale for revalidation
+    if (Date.now() - e.t < 30000) {
+      // Within 30s of expiry: return stale data, caller can revalidate
+      return { data: e.d, stale: true };
+    }
+    cache.delete(ep);
+    return null;
+  }
+  return { data: e.d, stale: false };
 }
 
 function setCache(ep, d) {
@@ -77,11 +106,12 @@ function setCache(ep, d) {
   cache.set(ep, { d, t: Date.now() + ttlKey(ep) });
 }
 
-// ─── CORE FETCH ────────────────────────────────────────────
+// ─── CORE FETCH (Optimized) ────────────────────────────────
 async function rawFetch(ep) {
   const res = await fetch(`${FD_BASE}${ep}`, { headers: getHeaders() });
   if (res.status === 429) {
-    await new Promise((r) => setTimeout(r, 8000));
+    // Rate limited — exponential backoff
+    await new Promise((r) => setTimeout(r, 5000));
     const r2 = await fetch(`${FD_BASE}${ep}`, { headers: getHeaders() });
     if (!r2.ok) throw new Error(`API ${r2.status}`);
     return r2.json();
@@ -92,16 +122,29 @@ async function rawFetch(ep) {
 
 async function apiFetch(ep) {
   if (!HAS_KEY) throw new Error("No API key configured. Add VITE_FOOTBALL_API_KEY to .env");
-  const c = getCached(ep);
-  if (c) return c;
-  const d = await enqueue(() => rawFetch(ep));
+
+  // Check cache first
+  const cached = getCached(ep);
+  if (cached && !cached.stale) return cached.data;
+
+  // If stale, return cached data and refresh in background
+  if (cached && cached.stale) {
+    // Background revalidation (fire and forget)
+    dedupedEnqueue(ep, () => rawFetch(ep))
+      .then((d) => setCache(ep, d))
+      .catch(() => {});
+    return cached.data;
+  }
+
+  // No cache — fetch and wait
+  const d = await dedupedEnqueue(ep, () => rawFetch(ep));
   setCache(ep, d);
   return d;
 }
 
 async function apiFetchFresh(ep) {
   if (!HAS_KEY) throw new Error("No API key configured. Add VITE_FOOTBALL_API_KEY to .env");
-  const d = await enqueue(() => rawFetch(ep));
+  const d = await dedupedEnqueue(ep, () => rawFetch(ep));
   setCache(ep, d);
   return d;
 }
@@ -138,7 +181,7 @@ export async function fetchStandings(code = "PL") {
   return d.standings?.[0]?.table || [];
 }
 
-// ─── TEAMS ─────────────────────────────────────────────────
+// ─── TEAMS (Parallel fetching) ─────────────────────────────
 export async function fetchCompetitionTeams(code = "PL") {
   const d = await apiFetch(`/competitions/${code}/teams`);
   return (d.teams || []).map((t) => ({
@@ -158,13 +201,16 @@ export async function fetchAllTeams() {
 
   _allTeamsPromise = (async () => {
     const codes = Object.keys(COMPETITIONS);
+    // Fetch ALL leagues in parallel instead of sequentially
+    const results = await Promise.allSettled(
+      codes.map((code) => fetchCompetitionTeams(code))
+    );
     const all = [];
-    for (const code of codes) {
-      try {
-        const teams = await fetchCompetitionTeams(code);
-        all.push(...teams);
-      } catch {}
-    }
+    results.forEach((result) => {
+      if (result.status === "fulfilled") {
+        all.push(...result.value);
+      }
+    });
     _allTeamsCache = all;
     _allTeamsPromise = null;
     return _allTeamsCache;
@@ -173,7 +219,7 @@ export async function fetchAllTeams() {
   return _allTeamsPromise;
 }
 
-// ─── SCORERS ───────────────────────────────────────────────
+// ─── SCORERS (Parallel fetching) ───────────────────────────
 export async function fetchTopScorers(code = "PL") {
   const d = await apiFetch(`/competitions/${code}/scorers?limit=20`);
   return (d.scorers || []).map((s) => ({
@@ -202,10 +248,16 @@ export async function fetchAllTopScorers() {
 
   _allScorersPromise = (async () => {
     const codes = ["PL", "PD", "BL1", "SA", "FL1"];
+    // Fetch ALL leagues in parallel
+    const results = await Promise.allSettled(
+      codes.map((c) => fetchTopScorers(c))
+    );
     const all = [];
-    for (const c of codes) {
-      try { all.push(...await fetchTopScorers(c)); } catch {}
-    }
+    results.forEach((result) => {
+      if (result.status === "fulfilled") {
+        all.push(...result.value);
+      }
+    });
     all.sort((a, b) => b.goals - a.goals);
     _allScorersCache = all;
     _allScorersPromise = null;

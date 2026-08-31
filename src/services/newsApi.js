@@ -163,19 +163,23 @@ function mapCategory(categories, keywords) {
 // ─── RSS Feed Fetcher ──────────────────────────────────────
 
 async function fetchFromRSS() {
-  const allArticles = [];
-
-  for (const feed of RSS_FEEDS) {
-    try {
+  // Fetch ALL RSS feeds in parallel instead of sequentially
+  const results = await Promise.allSettled(
+    RSS_FEEDS.map(async (feed) => {
       const url = `${CORS_PROXY}${encodeURIComponent(feed.url)}`;
       const res = await fetch(url);
-      if (!res.ok) continue;
-
+      if (!res.ok) return [];
       const text = await res.text();
-      const articles = parseRSS(text, feed.name);
-      allArticles.push(...articles);
-    } catch {}
-  }
+      return parseRSS(text, feed.name);
+    })
+  );
+
+  const allArticles = [];
+  results.forEach((result) => {
+    if (result.status === "fulfilled") {
+      allArticles.push(...result.value);
+    }
+  });
 
   return allArticles;
 }
