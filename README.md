@@ -1,8 +1,7 @@
 # ⚽ ዳዊት Football Live
 
-> Live football scores, standings, teams, top scorers & news — powered by [football-data.org](https://www.football-data.org/) API.
 
-**Live site:** [davefootball-live.vercel.app](https://davefootball-live.vercel.app/)
+**Live site:** [davefootball](https://davefootball-live.vercel.app/)
 
 ---
 
@@ -64,20 +63,6 @@ npm install
 cp .env.example .env
 ```
 
-### Environment Variables
-
-Create a `.env` file in the project root:
-
-```env
-# Football API - football-data.org (required)
-VITE_FOOTBALL_API_KEY=your_api_key_here
-
-# RapidAPI Football (optional - for streaming embeds)
-VITE_RAPIDAPI_KEY=your_rapidapi_key_here
-
-# NewsData.io (optional - for news section, free 200 credits/day)
-VITE_NEWSDATA_API_KEY=your_newsdata_key_here
-```
 
 For Vercel deployment, also add a server-side env var:
 
