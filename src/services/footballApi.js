@@ -5,12 +5,11 @@
  * No mock data — real API only.
  */
 
-const FD_BASE = import.meta.env.DEV ? "/api/fd" : "https://api.football-data.org/v4";
-const HAS_KEY = Boolean(import.meta.env.VITE_FOOTBALL_API_KEY);
+const FD_BASE = "/api/fd";
+const HAS_KEY = true;
 
 function getHeaders() {
-  const token = import.meta.env.VITE_FOOTBALL_API_KEY || "";
-  return token ? { "X-Auth-Token": token } : {};
+  return {};
 }
 
 // ─── RATE LIMITER ──────────────────────────────────────────
