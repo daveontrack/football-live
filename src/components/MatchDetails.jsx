@@ -4,12 +4,7 @@ import {
   Users,
   Clock,
   History,
-  Zap,
-  Target,
   Shield,
-  Shirt,
-  Circle,
-  ArrowRight,
   Loader2,
 } from "lucide-react";
 import {
@@ -209,7 +204,6 @@ function LineupTeam({ team, side }) {
         </div>
 
         {rows.map((row, rowIdx) => {
-          const position = rowIdx === 0 ? "Goalkeeper" : rowIdx === 1 ? "Defenders" : rowIdx === 2 ? "Midfielders" : "Forwards";
           return (
             <div key={rowIdx} className="relative mb-3 flex justify-center gap-2 last:mb-0">
               {row.map((player, pIdx) => (
@@ -299,7 +293,7 @@ function TimelineTab({ matchId, match }) {
   );
 }
 
-function TimelineEvent({ event, index }) {
+function TimelineEvent({ event }) {
   const minute = event.minute || event.time?.elapsed || 0;
   const type = (event.type || event.detail || "").toLowerCase();
   const player = event.player?.name || event.playerName || "";
