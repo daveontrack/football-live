@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, ExternalLink, Tv, Radio } from "lucide-react";
 import { matchWatchStyles as s } from "../assets/dummyStyles";
+import MatchDetails from "../components/MatchDetails";
 import {
   fetchTodayMatches,
   getMatchScore,
@@ -36,6 +37,7 @@ export default function MatchWatch() {
   const navigate = useNavigate();
   const [match, setMatch] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -54,21 +56,6 @@ export default function MatchWatch() {
     load();
   }, [matchId]);
 
-  // If match found, redirect to external site; if not, just redirect
-  useEffect(() => {
-    if (!loading && match) {
-      if (isLive(match)) {
-        window.location.href = LIVE_STREAM_URL;
-      } else {
-        window.location.href = REPLAY_URL;
-      }
-    } else if (!loading && !match) {
-      // No match found, redirect to live site
-      window.location.href = LIVE_STREAM_URL;
-    }
-  }, [loading, match]);
-
-  // While redirecting, show a brief screen
   const score = match ? getMatchScore(match) : null;
   const league = match ? getMatchLeague(match) : "";
   const homeName = match ? getMatchValue(match, ["homeTeam.name", "home.name"], "Home") : "Loading...";
@@ -87,72 +74,90 @@ export default function MatchWatch() {
         <span className={s.backTitle}>{league}</span>
       </div>
 
-      {/* Redirecting screen */}
-      <div className="flex min-h-[70vh] flex-col items-center justify-center gap-6 px-4 text-center animate-fade-in-scale">
-        {/* Team badges */}
-        <div className="flex items-center gap-6 animate-float">
-          <TeamBadge src={homeLogo} name={homeName} />
-          <div className="flex flex-col items-center gap-2">
-            {score?.hasScore ? (
-              <div className="flex items-center gap-2 text-3xl font-black text-white">
-                {score.home}
-                <span className="text-red-500">-</span>
-                {score.away}
-              </div>
+      {/* Match header */}
+      <div className="animate-fade-in-scale border-b border-white/5 bg-[#111] px-4 py-6 sm:px-6">
+        <div className="mx-auto max-w-4xl">
+          <p className="mb-4 text-center text-xs font-bold uppercase tracking-wider text-red-400">{league}</p>
+
+          <div className="flex items-center justify-center gap-4 sm:gap-8">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <TeamBadge src={homeLogo} name={homeName} size="md" />
+              <span className="text-sm font-black text-white sm:text-base">{homeName}</span>
+            </div>
+
+            <div className="flex flex-col items-center gap-1">
+              {score?.hasScore ? (
+                <div className="flex items-center gap-2 text-2xl font-black text-white sm:text-3xl">
+                  {score.home}
+                  <span className="text-red-500">-</span>
+                  {score.away}
+                </div>
+              ) : (
+                <span className="text-xl font-bold text-white/30">VS</span>
+              )}
+              {live && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/20 px-3 py-1 text-xs font-bold text-red-400">
+                  <span className="live-dot size-1.5 rounded-full bg-red-500" /> LIVE
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className="text-sm font-black text-white sm:text-base">{awayName}</span>
+              <TeamBadge src={awayLogo} name={awayName} size="md" />
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center animate-slide-in-bottom">
+            {live ? (
+              <a
+                href={LIVE_STREAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-red-600 to-red-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-red-500/30 transition animate-press hover:shadow-red-500/50"
+              >
+                <Radio size={16} /> Watch Live <ExternalLink size={12} />
+              </a>
             ) : (
-              <span className="text-2xl font-bold text-white/30">VS</span>
+              <a
+                href={REPLAY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white/60 transition animate-press hover:bg-white/10 hover:text-white"
+              >
+                <Tv size={16} /> Watch Replay <ExternalLink size={12} />
+              </a>
             )}
-            {live && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/20 px-3 py-1 text-xs font-bold text-red-400">
-                <span className="live-dot size-1.5 rounded-full bg-red-500" /> LIVE
-              </span>
-            )}
+
+            <button
+              onClick={() => setShowDetails(true)}
+              className="flex items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-6 py-3 text-sm font-bold text-red-400 transition animate-press hover:bg-red-500/20"
+            >
+              Match Details & Stats
+            </button>
           </div>
-          <TeamBadge src={awayLogo} name={awayName} />
-        </div>
 
-        {/* Team names */}
-        <div className="flex items-center gap-4 text-sm font-bold text-white/60">
-          <span>{homeName}</span>
-          <span className="text-white/20">vs</span>
-          <span>{awayName}</span>
+          <p className="mt-3 text-center text-[10px] text-white/20">
+            Opens in a new tab · We do not host or scrape streams
+          </p>
         </div>
-
-        {/* Redirecting message */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center gap-2 text-sm text-white/40">
-            <Tv size={16} />
-            Redirecting to live stream...
-          </div>
-          <div className="h-1 w-48 overflow-hidden rounded-full bg-white/10">
-            <div className="h-full w-full animate-pulse rounded-full bg-gradient-to-r from-red-500 to-red-400" />
-          </div>
-        </div>
-
-        {/* Manual buttons if redirect is blocked */}
-        <div className="flex flex-col gap-3 sm:flex-row animate-slide-in-bottom">
-          <a
-            href={LIVE_STREAM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-red-600 to-red-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-red-500/30 transition animate-press hover:shadow-red-500/50"
-          >
-            <Radio size={16} /> Watch Live <ExternalLink size={12} />
-          </a>
-          <a
-            href={REPLAY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white/60 transition hover:bg-white/10 hover:text-white"
-          >
-            <Tv size={16} /> Watch Replay <ExternalLink size={12} />
-          </a>
-        </div>
-
-        <p className="max-w-sm text-[10px] text-white/20">
-          Opens in a new tab · We do not host or scrape streams
-        </p>
       </div>
+
+      {/* Match Details Modal */}
+      {showDetails && match && (
+        <MatchDetails match={match} onClose={() => setShowDetails(false)} />
+      )}
+
+      {/* While loading */}
+      {loading && (
+        <div className="flex min-h-[40vh] items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="size-6 animate-spin rounded-full border-2 border-white/20 border-t-red-500" />
+            <span className="text-sm text-white/40">Loading match...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

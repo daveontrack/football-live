@@ -208,6 +208,55 @@ export async function fetchTeamDetails(teamId) {
   }
 }
 
+// ─── MATCH DETAILS (Statistics, Lineups, Timeline) ────────
+export async function fetchMatchStatistics(matchId) {
+  if (!matchId) return null;
+  try {
+    const d = await apiFetch(`/matches/${matchId}/statistics`);
+    return d.statistics || [];
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchMatchLineups(matchId) {
+  if (!matchId) return null;
+  try {
+    const d = await apiFetch(`/matches/${matchId}/lineups`);
+    return d || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchMatchTimeline(matchId) {
+  if (!matchId) return null;
+  try {
+    const d = await apiFetch(`/matches/${matchId}`);
+    return d.matchEvents || d.timelines || [];
+  } catch {
+    return [];
+  }
+}
+
+// ─── HEAD-TO-HEAD ─────────────────────────────────────────
+export async function fetchHeadToHead(team1Id, team2Id) {
+  if (!team1Id || !team2Id) return [];
+  try {
+    // football-data.org doesn't have a direct H2H endpoint,
+    // so we fetch recent matches for team1 and filter for team2
+    const d = await apiFetch(`/teams/${team1Id}/matches?status=FINISHED&limit=20`);
+    const matches = d.matches || [];
+    return matches.filter((m) => {
+      const home = m.homeTeam?.id;
+      const away = m.awayTeam?.id;
+      return (home === team1Id && away === team2Id) || (home === team2Id && away === team1Id);
+    }).slice(0, 5);
+  } catch {
+    return [];
+  }
+}
+
 let _allTeamsCache = null;
 let _allTeamsPromise = null;
 

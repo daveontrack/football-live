@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { liveScoreCardStyles as s } from "../assets/dummyStyles";
 import {
   getMatchLeague,
@@ -7,7 +8,8 @@ import {
   getTeamLogo,
 } from "../services/footballApi";
 import { useFavorites } from "../context/FavoritesContext";
-import { Heart } from "lucide-react";
+import { Heart, BarChart3 } from "lucide-react";
+import MatchDetails from "./MatchDetails";
 
 const teamNamePaths = {
   home: ["home.name", "homeTeam.name", "teams.home.name", "homeTeam", "home"],
@@ -27,6 +29,7 @@ function TeamLogo({ logo, name }) {
 }
 
 export default function LiveScoreCard({ match }) {
+  const [showDetails, setShowDetails] = useState(false);
   const { isMatchFavorited, toggleMatch, isTeamFavorited, toggleTeam } = useFavorites();
   const matchId = getMatchValue(match, ["id", "eventId", "fixture.id"]) || `${getMatchValue(match, teamNamePaths.home)}-${getMatchValue(match, teamNamePaths.away)}`;
   const favorited = isMatchFavorited(matchId);
@@ -102,7 +105,18 @@ export default function LiveScoreCard({ match }) {
 
       {/* Footer */}
       <div className={s.divider} />
-      <p className={s.footerText}>{matchTime}</p>
+      <div className="mt-3 flex items-center justify-between">
+        <p className={s.footerText}>{matchTime}</p>
+        <button
+          type="button"
+          onClick={() => setShowDetails(true)}
+          className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 text-[9px] font-bold text-white/40 transition hover:bg-white/10 hover:text-white"
+        >
+          <BarChart3 size={10} /> Details
+        </button>
+      </div>
+
+      {showDetails && <MatchDetails match={match} onClose={() => setShowDetails(false)} />}
     </article>
   );
 }
