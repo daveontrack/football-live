@@ -573,7 +573,7 @@ function FixtureCard({ match, dateOffset, onViewMatch }) {
   const statusKind = getStatusKind(match);
 
   return (
-    <div className={s.fixtureCard}>
+    <div className={`${s.fixtureCard} card-glow-hover`}>
       <MatchTeams
         match={match}
         columnClass={s.fixtureTeamColumn}

@@ -85,8 +85,8 @@ function MatchRatingsCard({ matchRatings, isActive }) {
   return (
     <div className={`rounded-2xl border p-4 transition sm:rounded-3xl sm:p-5 ${
       isActive
-        ? "border-red-500/30 bg-gradient-to-br from-red-900/20 to-[#111]"
-        : "border-white/5 bg-white/5"
+        ? "border-red-500/30 bg-gradient-to-br from-red-900/20 to-[#111] animate-border-glow"
+        : "border-white/5 bg-white/5 card-glow-hover"
     }`}>
       {/* Match header */}
       <div className="mb-4 flex items-center justify-between">

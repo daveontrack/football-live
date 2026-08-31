@@ -61,7 +61,7 @@ function ArticleCard({ article, featured = false }) {
   }
 
   return (
-    <article className={s.articleCard} onClick={handleClick} style={{ cursor: article.url && article.url !== "#" ? "pointer" : "default" }}>
+    <article className={`${s.articleCard} card-glow-hover`} onClick={handleClick} style={{ cursor: article.url && article.url !== "#" ? "pointer" : "default" }}>
       <div className={s.articleImageWrapper}>
         {article.image ? (
           <img src={article.image} alt={article.title} className={s.articleImage} />

@@ -48,7 +48,7 @@ function MatchFavoriteCard({ match, onRemove, onToggleNotify, notify }) {
     extractMatchData(match);
 
   return (
-    <div className={s.matchCard}>
+    <div className={`${s.matchCard} card-glow-hover`}>
       <div className={s.matchCardHeader}>
         <span className={s.matchLeague}>{league}</span>
         <div className={s.matchActions}>
@@ -120,9 +120,7 @@ function MatchFavoriteCard({ match, onRemove, onToggleNotify, notify }) {
       </div>
     </div>
   );
-}
-
-function TeamFavoriteCard({ teamName, onRemove, onToggleNotify, notify, allMatches }) {
+}function TeamFavoriteCard({ teamName, onRemove, onToggleNotify, notify, allMatches }) {
   const teamMatch = allMatches.find((m) => {
     const home = getMatchValue(m, teamNamePaths.home);
     const away = getMatchValue(m, teamNamePaths.away);
@@ -143,7 +141,7 @@ function TeamFavoriteCard({ teamName, onRemove, onToggleNotify, notify, allMatch
   }).length;
 
   return (
-    <div className={s.teamCard}>
+    <div className={`${s.teamCard} card-glow-hover`}>
       <div className={s.teamCardActions}>
         <button
           onClick={() => onToggleNotify("team", teamName)}

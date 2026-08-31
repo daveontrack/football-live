@@ -106,9 +106,9 @@ function MatchCard({ match }) {
   const type = getStatusType(match);
 
   return (
-    <div className={s.matchCard}>
+    <div className={`${s.matchCard} card-glow-hover`}>
       {/* Live glow */}
-      {type === "live" && <div className={s.liveGlow} />}
+      {type === "live" && <div className={`${s.liveGlow} animate-pulse-glow`} />}
 
       {/* Header */}
       <div className={s.cardHeader}>
@@ -158,7 +158,7 @@ function MatchCard({ match }) {
             href={LIVE_STREAM_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className={s.watchLiveButton}
+            className={`${s.watchLiveButton} animate-press`}
           >
             <Tv size={14} />
             Live Stream
@@ -169,7 +169,7 @@ function MatchCard({ match }) {
             href={REPLAY_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className={s.watchReplayButton}
+            className={`${s.watchReplayButton} animate-press`}
           >
             <Tv size={14} />
             Watch Replay

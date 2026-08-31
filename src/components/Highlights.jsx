@@ -16,7 +16,7 @@ import {
 
 function HighlightCard({ highlight, onPlay }) {
   return (
-    <div className={s.highlightCard}>
+    <div className={`${s.highlightCard} card-glow-hover`}>
       <div className={s.thumbnailWrapper} onClick={() => onPlay(highlight)}>
         <img src={highlight.thumbnail} alt={highlight.title} className={s.thumbnail} />
         <div className={s.thumbnailOverlay}>
@@ -51,11 +51,11 @@ function VideoModal({ highlight, onClose }) {
   if (!highlight) return null;
 
   return (
-    <div className={s.modalBackdrop} onClick={onClose}>
-      <div className={s.modal} onClick={(e) => e.stopPropagation()}>
+    <div className={`${s.modalBackdrop} animate-backdrop`} onClick={onClose}>
+      <div className={`${s.modal} animate-modal-enter`} onClick={(e) => e.stopPropagation()}>
         <div className={s.modalHeader}>
           <h3 className={s.modalTitle}>{highlight.title}</h3>
-          <button onClick={onClose} className={s.closeButton}>✕</button>
+          <button onClick={onClose} className={`${s.closeButton} animate-press`}>✕</button>
         </div>
         <div className={s.videoWrapper}>
           <div className={s.videoPlaceholder}>

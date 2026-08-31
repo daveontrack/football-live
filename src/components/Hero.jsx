@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Play } from "lucide-react";
 import { heroStyles as s } from "../assets/dummyStyles";
 import { getMatchValue, getMatchScore, getMatchStatus, getTeamLogo, fetchTodayMatches } from "../services/footballApi";
+import { AnimateOnScroll } from "../hooks/useInView.jsx";
 import heroImage from "../assets/burno.jpg";
 
 const LIVE_STREAM_URL = "https://live.epicsports.in/";
@@ -26,12 +27,14 @@ function RealTeamBadge({ logo, name, featured }) {
   );
 }
 
-function StatBlock({ value, label }) {
+function StatBlock({ value, label, delay = 0 }) {
   return (
-    <div>
-      <p className={s.statValue}>{value}</p>
-      <p className={s.statLabel}>{label}</p>
-    </div>
+    <AnimateOnScroll animation="fade-in-up" delay={delay}>
+      <div>
+        <p className={s.statValue}>{value}</p>
+        <p className={s.statLabel}>{label}</p>
+      </div>
+    </AnimateOnScroll>
   );
 }
 
@@ -105,7 +108,7 @@ export default function Hero() {
         <img
           src={heroImage}
           alt="Football"
-          className={s.heroVideo}
+          className={`${s.heroVideo} animate-hero-drift`}
           style={{ objectFit: "cover" }}
         />
         <div className={s.overlayGradient} />
@@ -113,22 +116,32 @@ export default function Hero() {
         <div className={s.gridContainer}>
           {/* Left – stats */}
           <aside className={s.statsAside}>
-            <StatBlock value={matches.length} label="Matches" />
-            <StatBlock value={loading ? "—" : "Live"} label="Status" />
-            <StatBlock value="24/7" label="Coverage" />
+            <StatBlock value={matches.length} label="Matches" delay={200} />
+            <StatBlock value={loading ? "—" : "Live"} label="Status" delay={350} />
+            <StatBlock value="24/7" label="Coverage" delay={500} />
           </aside>
 
           {/* Center – heading */}
           <div className={s.headingWrapper}>
-            <h1 className={s.heading}>
-              Football
-              <br />
-              Live
-            </h1>
+            <AnimateOnScroll animation="fade-in-up" delay={100}>
+              <h1 className={`${s.heading} animate-gradient-shift`} style={{
+                background: "linear-gradient(135deg, #ffffff 0%, #ff6b6b 25%, #ffffff 50%, #ff4444 75%, #ffffff 100%)",
+                backgroundSize: "200% 200%",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                color: "transparent",
+                WebkitTextFillColor: "transparent",
+              }}>
+                Football
+                <br />
+                Live
+              </h1>
+            </AnimateOnScroll>
           </div>
 
           {/* Right – featured match */}
           <div className={s.rightPanel}>
+            <AnimateOnScroll animation="fade-in-right" delay={300}>
             {loading && !featured ? (
               <div className={s.emptyState}>Loading matches…</div>
             ) : featured ? (
@@ -149,10 +162,9 @@ export default function Hero() {
                     </a>
                   </div>
                   <MatchRow match={featured} featured />
-                </div>
-
-                {matches.length > 1 && (
+                </div>                  {matches.length > 1 && (
                   <>
+                    <AnimateOnScroll animation="fade-in-up" delay={100}>
                     <div className={s.moreMatchesRow}>
                       <span className={s.moreMatchesLabel}>More Matches</span>
                     </div>
@@ -161,12 +173,14 @@ export default function Hero() {
                         <MatchRow key={m.id || i} match={m} />
                       ))}
                     </div>
+                    </AnimateOnScroll>
                   </>
                 )}
               </>
             ) : (
               <div className={s.emptyState}>No matches available.</div>
             )}
+            </AnimateOnScroll>
           </div>
         </div>
       </div>

@@ -41,9 +41,9 @@ export default function LiveScoreCard({ match }) {
   const matchTime = getMatchStatus(match);
 
   return (
-    <article className={s.card}>
-      <div className={s.glowRed} />
-      <div className={s.glowBlue} />
+    <article className={`${s.card} card-glow-hover`}>
+      <div className={`${s.glowRed} transition-all duration-500 group-hover:bg-red-500/25`} />
+      <div className={`${s.glowBlue} transition-all duration-500 group-hover:bg-blue-500/15`} />
 
       {/* Header */}
       <div className={s.header}>
@@ -52,13 +52,13 @@ export default function LiveScoreCard({ match }) {
           <button
             type="button"
             onClick={() => toggleMatch(matchId)}
-            className="grid size-7 place-items-center rounded-full transition"
+            className={`grid size-7 place-items-center rounded-full transition animate-press ${favorited ? "animate-heart-beat" : ""}`}
             style={{ background: favorited ? "rgba(239,68,68,0.25)" : "rgba(255,255,255,0.1)" }}
             title={favorited ? "Remove from favorites" : "Add to favorites"}
           >
             <Heart size={12} className={favorited ? "text-red-400" : "text-white/40"} fill={favorited ? "currentColor" : "none"} />
           </button>
-          <div className={s.liveBadge}>
+          <div className={`${s.liveBadge} animate-pulse-glow`}>
             <span className={s.liveDot} />
             <span className={s.liveText}>Live</span>
           </div>

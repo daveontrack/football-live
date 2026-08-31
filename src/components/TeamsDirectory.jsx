@@ -19,7 +19,7 @@ const LEAGUE_TABS = Object.keys(COMPETITIONS);
 
 function TeamCard({ team, onClick }) {
   return (
-    <div className={s.teamCard} onClick={() => onClick(team)}>
+    <div className={`${s.teamCard} card-glow-hover`} onClick={() => onClick(team)}>
       <div className={s.cardHeader}>
         {team.crest ? (
           <img src={team.crest} alt={team.name} className={s.teamLogo} />
@@ -67,8 +67,8 @@ function TeamCard({ team, onClick }) {
 function TeamDetail({ team, onClose }) {
   if (!team) return null;
   return (
-    <div className={s.detailBackdrop} onClick={onClose}>
-      <div className={s.detailPanel} onClick={(e) => e.stopPropagation()}>
+    <div className={`${s.detailBackdrop} animate-backdrop`} onClick={onClose}>
+      <div className={`${s.detailPanel} animate-modal-enter`} onClick={(e) => e.stopPropagation()}>
         <div className={s.detailHeader}>
           <div className={s.detailTeamInfo}>
             {team.crest ? (
@@ -83,7 +83,7 @@ function TeamDetail({ team, onClose }) {
               <p className={s.detailLeague}>{team.competitionName || team.country}</p>
             </div>
           </div>
-          <button onClick={onClose} className={s.closeButton}>✕</button>
+          <button onClick={onClose} className={`${s.closeButton} animate-press`}>✕</button>
         </div>
 
         <div className={s.infoGrid}>

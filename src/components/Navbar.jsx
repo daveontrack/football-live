@@ -81,7 +81,7 @@ export default function Navbar() {
             </button>
 
             {moreOpen && (
-              <div className="absolute left-1/2 top-full z-50 mt-2 w-48 -translate-x-1/2 overflow-hidden rounded-xl border border-white/10 bg-[#111] shadow-2xl shadow-black/50 backdrop-blur-xl">
+              <div className="absolute left-1/2 top-full z-50 mt-2 w-48 -translate-x-1/2 overflow-hidden rounded-xl border border-white/10 bg-[#111] shadow-2xl shadow-black/50 backdrop-blur-xl animate-fade-in-scale">
                 <div className="p-1.5">
                   {moreLinks.map((link) => (
                     <a
@@ -108,7 +108,7 @@ export default function Navbar() {
         {/* Watch Live button */}
         <a
           href="/watch-live"
-          className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-2 text-[10px] font-black uppercase text-white shadow-lg shadow-red-500/30 transition hover:bg-red-500 hover:shadow-red-500/50 min-[380px]:px-4 min-[380px]:text-[11px]"
+          className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-2 text-[10px] font-black uppercase text-white shadow-lg shadow-red-500/30 transition animate-press hover:bg-red-500 hover:shadow-red-500/50 min-[380px]:px-4 min-[380px]:text-[11px] animate-border-glow"
         >
           <Tv size={12} />
           <span className="hidden min-[380px]:inline">Watch Live</span>

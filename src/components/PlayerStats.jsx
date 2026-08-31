@@ -32,7 +32,7 @@ function StatBar({ label, value, max = 100, color = "red" }) {
 
 function PlayerCard({ player, onClick }) {
   return (
-    <div className={s.playerCard} onClick={() => onClick(player)}>
+    <div className={`${s.playerCard} card-glow-hover`} onClick={() => onClick(player)}>
       <div className={s.playerImageWrapper}>
         {player.teamLogo ? (
           <img src={player.teamLogo} alt={player.team} className={s.playerImage} />
@@ -72,8 +72,8 @@ function PlayerCard({ player, onClick }) {
 function PlayerDetail({ player, onClose }) {
   if (!player) return null;
   return (
-    <div className={s.detailBackdrop} onClick={onClose}>
-      <div className={s.detailPanel} onClick={(e) => e.stopPropagation()}>
+    <div className={`${s.detailBackdrop} animate-backdrop`} onClick={onClose}>
+      <div className={`${s.detailPanel} animate-modal-enter`} onClick={(e) => e.stopPropagation()}>
         <div className={s.detailHeader}>
           <div className={s.detailPlayerInfo}>
             {player.teamLogo ? (
@@ -92,7 +92,7 @@ function PlayerDetail({ player, onClose }) {
               </div>
             </div>
           </div>
-          <button onClick={onClose} className={s.closeButton}>✕</button>
+          <button onClick={onClose} className={`${s.closeButton} animate-press`}>✕</button>
         </div>
 
         <div className={s.statsGrid}>

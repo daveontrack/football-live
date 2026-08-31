@@ -88,9 +88,9 @@ export default function MatchWatch() {
       </div>
 
       {/* Redirecting screen */}
-      <div className="flex min-h-[70vh] flex-col items-center justify-center gap-6 px-4 text-center">
+      <div className="flex min-h-[70vh] flex-col items-center justify-center gap-6 px-4 text-center animate-fade-in-scale">
         {/* Team badges */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-6 animate-float">
           <TeamBadge src={homeLogo} name={homeName} />
           <div className="flex flex-col items-center gap-2">
             {score?.hasScore ? (
@@ -130,12 +130,12 @@ export default function MatchWatch() {
         </div>
 
         {/* Manual buttons if redirect is blocked */}
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex flex-col gap-3 sm:flex-row animate-slide-in-bottom">
           <a
             href={LIVE_STREAM_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-red-600 to-red-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-red-500/30 transition hover:shadow-red-500/50"
+            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-red-600 to-red-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-red-500/30 transition animate-press hover:shadow-red-500/50"
           >
             <Radio size={16} /> Watch Live <ExternalLink size={12} />
           </a>
