@@ -13,7 +13,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { teamsStyles as s } from "../assets/dummyStyles";
-import { fetchCompetitionTeams, COMPETITIONS } from "../services/footballApi";
+import { fetchCompetitionTeams, fetchTeamDetails, COMPETITIONS } from "../services/footballApi";
 
 const LEAGUE_TABS = Object.keys(COMPETITIONS);
 
@@ -54,10 +54,10 @@ function TeamCard({ team, onClick }) {
           </div>
         )}
       </div>
-      {team.coach?.name && (
+      {(team.coach?.name || team.runningCompetitions?.length > 0) && (
         <div className="mt-2 flex items-center gap-1.5 text-[10px] text-white/40">
           <Shield size={10} />
-          <span>Coach: {team.coach.name}</span>
+          <span>Coach: {team.coach?.name || "View details"}</span>
         </div>
       )}
     </div>
@@ -65,7 +65,34 @@ function TeamCard({ team, onClick }) {
 }
 
 function TeamDetail({ team, onClose }) {
+  const [coachName, setCoachName] = useState(null);
+  const [loadingCoach, setLoadingCoach] = useState(false);
+
+  // Fetch real coach data on-demand when detail opens
+  useEffect(() => {
+    if (!team || !team.id) return;
+    // If coach already available from list, use it
+    if (team.coach?.name) {
+      setCoachName(team.coach.name);
+      return;
+    }
+    // Otherwise fetch detailed team info
+    let active = true;
+    setLoadingCoach(true);
+    fetchTeamDetails(team.id)
+      .then((detail) => {
+        if (active && detail?.coach?.name) {
+          setCoachName(detail.coach.name);
+        }
+      })
+      .catch(() => {})
+      .finally(() => { if (active) setLoadingCoach(false); });
+    return () => { active = false; };
+  }, [team?.id, team?.coach?.name]);
+
   if (!team) return null;
+  const displayCoach = coachName || team.coach?.name || (loadingCoach ? "Loading..." : "Unknown");
+
   return (
     <div className={`${s.detailBackdrop} animate-backdrop`} onClick={onClose}>
       <div className={`${s.detailPanel} animate-modal-enter`} onClick={(e) => e.stopPropagation()}>
@@ -91,7 +118,7 @@ function TeamDetail({ team, onClose }) {
             [MapPin, "Stadium", team.venue || "Unknown"],
             [Users, "Squad", `${team.squad?.length || 0} players`],
             [Calendar, "Founded", team.founded || "Unknown"],
-            [Shield, "Coach", team.coach?.name || "Unknown"],
+            [Shield, "Coach", displayCoach],
           ].map(([Icon, label, val]) => (
             <div key={label} className={s.infoCard}>
               <Icon size={18} className={s.infoIcon} />

@@ -192,6 +192,22 @@ export async function fetchCompetitionTeams(code = "PL") {
   }));
 }
 
+// Fetch detailed team info including coach (on-demand)
+const teamDetailCache = new Map();
+export async function fetchTeamDetails(teamId) {
+  if (!teamId) return null;
+  if (teamDetailCache.has(teamId)) return teamDetailCache.get(teamId);
+
+  try {
+    const d = await apiFetch(`/teams/${teamId}`);
+    teamDetailCache.set(teamId, d);
+    return d;
+  } catch {
+    teamDetailCache.set(teamId, null);
+    return null;
+  }
+}
+
 let _allTeamsCache = null;
 let _allTeamsPromise = null;
 
