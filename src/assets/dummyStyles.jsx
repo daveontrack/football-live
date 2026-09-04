@@ -1,25 +1,25 @@
 // assets/dummyStyles.js
 export const navbarStyles = {
-  // Outer nav container
-  nav: "absolute left-0 right-0 top-0 z-30 px-3 pt-4 sm:px-6 sm:pt-10 lg:pt-12",
+  // Outer nav container — fixed top with glassmorphism
+  nav: "fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-[#0a0a0a]/80 backdrop-blur-xl backdrop-saturate-150 transition-colors duration-300",
 
   // Inner flex container
   innerContainer:
-    "mx-auto flex max-w-[1120px] items-center justify-between gap-3 text-white",
+    "mx-auto flex h-14 max-w-[1200px] items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-8",
 
   // Logo link
-  logo: "shrink-0 text-sm font-black uppercase tracking-tight sm:text-lg",
+  logo: "shrink-0 text-sm font-black uppercase tracking-tight text-white sm:text-lg",
 
   // Desktop navigation wrapper
   desktopNav:
-    "hidden items-center gap-8 text-[10px] font-bold uppercase tracking-wider text-white/70 md:flex lg:gap-12",
+    "hidden items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-white/50 md:flex",
 
   // Desktop navigation links
-  desktopNavLink: "transition hover:text-white",
+  desktopNavLink: "rounded-lg px-3 py-2 transition-colors duration-200 hover:bg-white/[0.08] hover:text-white",
 
   // Live stream button
   liveButton:
-    "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-black/80 px-2.5 py-2 text-[9px] font-bold text-white shadow-2xl shadow-black/30 backdrop-blur-sm transition hover:bg-black min-[380px]:gap-2 min-[380px]:px-3 min-[380px]:text-[10px] sm:px-4 sm:py-2.5",
+    "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-red-600 px-3 py-1.5 text-[10px] font-black uppercase text-white shadow-lg shadow-red-600/25 transition-all duration-200 hover:bg-red-500 hover:shadow-red-500/40 sm:px-4 sm:py-2 sm:text-xs",
 
   // Live icon (Circle)
   liveIcon: "fill-red-500 text-red-500",
@@ -30,17 +30,44 @@ export const navbarStyles = {
   // Live text – short version (visible only below 360px)
   liveTextShort: "min-[360px]:hidden",
 
-  // Mobile hamburger button
+  // Mobile hamburger button — animated
   hamburgerButton:
-    "grid size-9 place-items-center rounded-full bg-white/10 text-white backdrop-blur-sm md:hidden",
+    "relative grid size-9 place-items-center rounded-lg text-white transition-colors duration-200 hover:bg-white/[0.08] md:hidden",
 
-  // Mobile menu overlay container
+  // Theme toggle (desktop)
+  themeToggle:
+    "hidden grid size-9 place-items-center rounded-lg text-white/60 transition-colors duration-200 hover:bg-white/[0.08] hover:text-white md:grid",
+
+  // Theme toggle (mobile - inside mobile menu)
+  themeToggleMobile:
+    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-white/70 transition-colors duration-200 hover:bg-white/[0.08] hover:text-white",
+
+  // Mobile menu overlay
+  mobileOverlay:
+    "fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden",
+
+  // Mobile menu drawer — slides in from right
   mobileMenu:
-    "absolute left-3 right-3 top-full mt-2 flex flex-col gap-1 rounded-2xl bg-black/90 p-3 backdrop-blur-xl sm:left-4 sm:right-4 sm:p-4 md:hidden",
+    "fixed inset-y-0 right-0 z-50 flex w-[min(320px,85vw)] flex-col bg-[#111]/95 backdrop-blur-2xl transition-transform duration-300 ease-out md:hidden",
+
+  // Mobile menu header
+  mobileMenuHeader:
+    "flex items-center justify-between border-b border-white/[0.06] px-4 py-4",
 
   // Mobile menu links
   mobileMenuLink:
-    "rounded-xl px-4 py-3 text-sm font-bold text-white/80 transition hover:bg-white/10 hover:text-white",
+    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-white/70 transition-colors duration-200 hover:bg-white/[0.08] hover:text-white",
+
+  // Mobile menu section label
+  mobileMenuLabel:
+    "px-4 pt-5 pb-2 text-[10px] font-black uppercase tracking-widest text-white/25",
+
+  // Mobile menu divider
+  mobileMenuDivider: "mx-4 my-1 h-px bg-white/[0.06]",
+
+  // Close button inside mobile menu
+  mobileMenuClose:
+    "grid size-9 place-items-center rounded-lg text-white/60 transition-colors duration-200 hover:bg-white/[0.08] hover:text-white",
 };
 
 
@@ -168,7 +195,7 @@ export const mainSectionStyles = {
   // Standings section
   standingsSection: "mb-16 sm:mb-24",
   standingsCard: "glass-card overflow-hidden rounded-2xl sm:rounded-3xl",
-  standingsRow: "group grid grid-cols-[36px_1fr_auto] items-center gap-3 border-b border-white/5 p-3 transition hover:bg-white/5 last:border-b-0 sm:grid-cols-[48px_1fr_auto] sm:gap-4 sm:p-4",
+  standingsRow: "group grid grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-2 border-b border-white/5 p-3 transition hover:bg-white/5 last:border-b-0 sm:grid-cols-[48px_1fr_auto] sm:gap-4 sm:p-4",
   standingsRank: "text-center text-lg font-black text-red-500 sm:text-xl",
   standingsTeamInfo: "min-w-0",
   standingsTeamName: "truncate text-sm font-black text-white sm:text-base",
