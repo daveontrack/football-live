@@ -1,7 +1,7 @@
-# ⚽ ዳዊት Football Live
+               # ⚽ ዳዊት Football Live
 
 
-**Live site:** [davefootball](https://davefootball-live.vercel.app/)
+[davefootball](https://davefootball-live.vercel.app/)
 
 ---
 
@@ -43,11 +43,6 @@
 - **Deployment:** Vercel (with serverless API proxy)
 
 ## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- A free API key from [football-data.org](https://www.football-data.org/)
 
 ### Installation
 
