@@ -1,5 +1,6 @@
-               # ⚽ ዳዊት Football Live
-
+<h1 className="text-4xl md:text-5xl font-bold">
+  ⚽ ዳዊት Football Live
+</h1>
 
 [davefootball](https://davefootball-live.vercel.app/)
 
