@@ -485,13 +485,13 @@ function StandingsRow({ row, index }) {
         </div>
         <p className={s.standingsTeamMeta}>{won}W {draw}D {lost}L · GF {gf} · GA {ga} · GD {gd > 0 ? "+" : ""}{gd}</p>
       </div>
-      <div className="flex items-center gap-4 text-center">
-        <span className="w-6 text-xs font-semibold text-white/60">{played}</span>
-        <span className="w-6 text-xs font-semibold text-green-400">{won}</span>
-        <span className="w-6 text-xs font-semibold text-yellow-400">{draw}</span>
-        <span className="w-6 text-xs font-semibold text-red-400">{lost}</span>
-        <span className="w-8 text-xs font-bold text-white/70">{gd > 0 ? "+" : ""}{gd}</span>
-        <span className="w-8 text-sm font-black text-white">{points}</span>
+      <div className="flex items-center gap-2 text-center sm:gap-4">
+        <span className="w-5 text-[11px] font-semibold text-white/60 sm:w-6 sm:text-xs">{played}</span>
+        <span className="hidden text-[11px] font-semibold text-green-400 sm:inline sm:w-6 sm:text-xs">{won}</span>
+        <span className="hidden text-[11px] font-semibold text-yellow-400 sm:inline sm:w-6 sm:text-xs">{draw}</span>
+        <span className="hidden text-[11px] font-semibold text-red-400 sm:inline sm:w-6 sm:text-xs">{lost}</span>
+        <span className="w-7 text-[11px] font-bold text-white/70 sm:w-8 sm:text-xs">{gd > 0 ? "+" : ""}{gd}</span>
+        <span className="w-7 text-xs font-black text-white sm:w-8 sm:text-sm">{points}</span>
       </div>
     </div>
   );
@@ -534,16 +534,16 @@ export function Standings({ standings, loading, empty, activeLeague, setActiveLe
         ) : standings && standings.length ? (
           <>
             {/* Header row */}
-            <div className="grid grid-cols-[48px_1fr_auto] items-center gap-4 border-b border-white/10 px-4 py-2 text-[9px] font-bold uppercase tracking-wider text-white/40">
+            <div className="grid grid-cols-[36px_1fr_auto] items-center gap-2 px-4 py-2 text-[9px] font-bold uppercase tracking-wider text-white/40 sm:grid-cols-[48px_1fr_auto] sm:gap-4">
               <span className="text-center">#</span>
               <span>Club</span>
-              <div className="flex items-center gap-4 text-center">
-                <span className="w-6">P</span>
-                <span className="w-6">W</span>
-                <span className="w-6">D</span>
-                <span className="w-6">L</span>
-                <span className="w-8">GD</span>
-                <span className="w-8">Pts</span>
+              <div className="flex items-center gap-2 text-center sm:gap-4">
+                <span className="w-5 sm:w-6">P</span>
+                <span className="hidden sm:inline sm:w-6">W</span>
+                <span className="hidden sm:inline sm:w-6">D</span>
+                <span className="hidden sm:inline sm:w-6">L</span>
+                <span className="w-7 sm:w-8">GD</span>
+                <span className="w-7 sm:w-8">Pts</span>
               </div>
             </div>
             {/* Legend */}
